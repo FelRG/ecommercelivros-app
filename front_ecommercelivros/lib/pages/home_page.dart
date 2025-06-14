@@ -2,21 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:front_ecommercelivros/widgets/livrolumina_appbar.dart';
 import 'package:front_ecommercelivros/widgets/livrolumina_bottomnav.dart';
 import 'package:front_ecommercelivros/widgets/produto_card.dart';
+import '../models/livro.dart';
+import '../service/livro_service.dart';
 import 'carrinho_page.dart';
 import 'conta_page.dart';
 import 'menu_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final produtos = List.generate(4, (index) => {
-      'titulo': 'Hygge: The Danish Way To Live Well',
-      'preco': 'R\$ 36,99',
-      'imagemUrl': 'assets/images/iconelivro.jpg', // ajuste o caminho
-    });
+  State<HomePage> createState() => _HomePageState();
+}
 
+class _HomePageState extends State<HomePage> {
+  final LivroService _livroService = LivroService();
+  List<Livro> _livros = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarLivrosDisponiveis();
+  }
+
+  Future<void> _carregarLivrosDisponiveis() async {
+    final livros = await _livroService.buscarTodosOsLivros();
+    final livrosAVenda = livros.where((l) => l.estaAVenda == true).toList();
+
+    setState(() {
+      _livros = livrosAVenda;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: const LivroLuminaAppBar(),
       body: SingleChildScrollView(
@@ -24,7 +43,7 @@ class HomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Campo de busca com lupa
+            // Campo de busca
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
@@ -42,21 +61,23 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 24),
             const Text(
               'Ofertas para você',
-              style: TextStyle(fontSize: 24,
+              style: TextStyle(
+                fontSize: 24,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF4C3A32),),
+                color: Color(0xFF4C3A32),
+              ),
             ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: produtos
-                  .map((p) => ProdutoCard(
-                titulo: p['titulo']!,
-                preco: p['preco']!,
-                imagemUrl: p['imagemUrl']!,
-              ))
-                  .toList(),
+              children: _livros.map((livro) {
+                return ProdutoCard(
+                  titulo: livro.titulo,
+                  preco: 'R\$ ${livro.preco.toStringAsFixed(2)}',
+                  imagemUrl: livro.urlImagem ?? 'assets/images/iconelivro.jpg',
+                );
+              }).toList(),
             ),
           ],
         ),
@@ -66,16 +87,22 @@ class HomePage extends StatelessWidget {
         onTap: (index) {
           switch (index) {
             case 1:
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const ContaPage()));
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const ContaPage()),
+              );
               break;
             case 2:
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const CarrinhoPage()));
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const CarrinhoPage()),
+              );
               break;
             case 3:
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const MenuPage()));
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const MenuPage()),
+              );
               break;
           }
         },

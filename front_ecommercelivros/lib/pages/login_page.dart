@@ -129,17 +129,17 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _login() async {
-    // if (_formKey.currentState!.validate()) {
-    //   final user = await _authService.login(
-    //     _emailController.text,
-    //     _passwordController.text,
-    //   );
-    // if (user != null) {
+    if (_formKey.currentState!.validate()) {
+      final user = await _authService.login(
+        _emailController.text,
+        _passwordController.text,
+      );
+    if (user != null) {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const HomePage()),
     );
-    // }
-    // }
+    }
+    }
   }
 }
