@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/livro.dart';
 import '../widgets/livrolumina_appbar.dart';
 import '../widgets/livrolumina_bottomnav.dart';
 import 'carrinho_page.dart';
@@ -6,7 +7,8 @@ import 'conta_page.dart';
 import 'home_page.dart';
 
 class EditarLivroPage extends StatefulWidget {
-  const EditarLivroPage({super.key});
+  final Livro livro;
+  const EditarLivroPage({super.key, required this.livro});
 
   @override
   State<EditarLivroPage> createState() => _EditarLivroPageState();

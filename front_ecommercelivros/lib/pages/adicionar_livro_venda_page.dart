@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/livro.dart';
+import '../persistence/livro_dao.dart';
 import '../widgets/livrolumina_appbar.dart';
 import '../widgets/livrolumina_bottomnav.dart';
 import 'carrinho_page.dart';
@@ -15,6 +18,13 @@ class AdicionarLivroVendaPage extends StatefulWidget {
 class _AdicionarLivroVendaPageState extends State<AdicionarLivroVendaPage> {
   final _formKey = GlobalKey<FormState>();
 
+  final TextEditingController _tituloController = TextEditingController();
+  final TextEditingController _autorController = TextEditingController();
+  final TextEditingController _precoController = TextEditingController();
+  final TextEditingController _urlImagemController = TextEditingController();
+  final TextEditingController _descricaoController = TextEditingController();
+
+  String quantidade = '1';
   String estaAVenda = 'Não';
   final List<String> opcoesVenda = ['Sim', 'Não'];
 
@@ -38,17 +48,17 @@ class _AdicionarLivroVendaPageState extends State<AdicionarLivroVendaPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              _buildTextField('Título', 'Título'),
+              _buildTextField('Título', 'Título', _tituloController),
               const SizedBox(height: 12),
-              _buildTextField('Autor', 'Ex: Thomas Emerson'),
+              _buildTextField('Autor', 'Ex: Thomas Emerson', _autorController),
               const SizedBox(height: 12),
-              _buildTextField('Preço Unitário', 'Ex: 15,00'),
+              _buildTextField('Preço Unitário', 'Ex: 15,00', _precoController),
               const SizedBox(height: 12),
-              _buildTextField('URL da imagem (opcional)', 'Ex: https://ex.com/img/photo.jpg'),
+              _buildTextField('URL da imagem (opcional)', 'Ex: https://ex.com/img/photo.jpg', _urlImagemController),
               const SizedBox(height: 12),
               _buildDropdownField('Quantidade', '1'),
               const SizedBox(height: 12),
-              _buildMultilineTextField('Descrição', 'Ex: Este livro traz dicas...'),
+              _buildMultilineTextField('Descrição', 'Ex: Este livro traz dicas...', _descricaoController),
               const SizedBox(height: 12),
               _buildVendaDropdown(),
               const SizedBox(height: 24),
@@ -73,11 +83,7 @@ class _AdicionarLivroVendaPageState extends State<AdicionarLivroVendaPage> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          // Salvar livro
-                        }
-                      },
+                      onPressed: _adicionarLivro,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
@@ -114,14 +120,49 @@ class _AdicionarLivroVendaPageState extends State<AdicionarLivroVendaPage> {
     );
   }
 
-  Widget _buildTextField(String label, String hint) {
+  Future<void> _adicionarLivro() async {
+    if (_formKey.currentState!.validate()) {
+      final prefs = await SharedPreferences.getInstance();
+      final usuarioId = prefs.getInt('usuario_id');
+
+      if (usuarioId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro: usuário não logado.')),
+        );
+        return;
+      }
+
+      final livro = Livro(
+        titulo: _tituloController.text.trim(),
+        autor: _autorController.text.trim(),
+        preco: double.tryParse(_precoController.text.replaceAll(',', '.')) ?? 0.0,
+        urlImagem: _urlImagemController.text.isEmpty ? null : _urlImagemController.text.trim(),
+        quantidade: int.parse(quantidade),
+        descricao: _descricaoController.text.trim(),
+        estaAVenda: estaAVenda == 'Sim',
+        usuarioId: usuarioId,
+      );
+
+      final livroDao = LivroDao();
+      await livroDao.insertLivro(livro);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Livro adicionado com sucesso!')),
+      );
+      Navigator.pop(context);
+    }
+  }
+
+  Widget _buildTextField(String label, String hint, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: _labelStyle()),
         const SizedBox(height: 4),
         TextFormField(
+          controller: controller,
           decoration: _inputDecoration(hint),
+          validator: (value) => value!.isEmpty ? 'Campo obrigatório' : null,
         ),
       ],
     );
@@ -134,24 +175,29 @@ class _AdicionarLivroVendaPageState extends State<AdicionarLivroVendaPage> {
         Text(label, style: _labelStyle()),
         const SizedBox(height: 4),
         DropdownButtonFormField<String>(
-          value: hint,
+          value: quantidade,
           decoration: _inputDecoration(''),
           items: List.generate(20, (index) => (index + 1).toString())
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
-          onChanged: (value) {},
+          onChanged: (value) {
+            setState(() {
+              quantidade = value!;
+            });
+          },
         ),
       ],
     );
   }
 
-  Widget _buildMultilineTextField(String label, String hint) {
+  Widget _buildMultilineTextField(String label, String hint, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: _labelStyle()),
         const SizedBox(height: 4),
         TextFormField(
+          controller: controller,
           maxLines: 4,
           decoration: _inputDecoration(hint),
         ),
@@ -168,9 +214,7 @@ class _AdicionarLivroVendaPageState extends State<AdicionarLivroVendaPage> {
         DropdownButtonFormField<String>(
           value: estaAVenda,
           decoration: _inputDecoration(''),
-          items: opcoesVenda
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
+          items: opcoesVenda.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
           onChanged: (value) {
             setState(() {
               estaAVenda = value!;

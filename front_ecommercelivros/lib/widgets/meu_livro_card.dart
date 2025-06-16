@@ -24,11 +24,13 @@ class MeuLivroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(vertical: 8), // Para dar espaçamento entre cards
       decoration: BoxDecoration(
         color: const Color(0xFFE7E3E3),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
@@ -37,6 +39,12 @@ class MeuLivroCard extends StatelessWidget {
               width: 70,
               height: 90,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 70,
+                height: 90,
+                color: Colors.grey[300],
+                child: const Icon(Icons.broken_image, color: Colors.grey),
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -46,6 +54,8 @@ class MeuLivroCard extends StatelessWidget {
               children: [
                 Text(
                   titulo,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -74,19 +84,22 @@ class MeuLivroCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          Column(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit, color: Color(0xFF432E2E)),
-                onPressed: onEditar,
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete, color: Color(0xFF432E2E)),
-                onPressed: onDeletar,
-              ),
-            ],
-          )
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 48, // Largura controlada para os botões
+            child: Column(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Color(0xFF432E2E)),
+                  onPressed: onEditar,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Color(0xFF432E2E)),
+                  onPressed: onDeletar,
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

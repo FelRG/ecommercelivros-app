@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _carregarLivrosDisponiveis() async {
-    final livros = await _livroService.buscarTodosOsLivros();
+    final livros = await _livroService.buscarLivrosAVenda();
     final livrosAVenda = livros.where((l) => l.estaAVenda == true).toList();
 
     setState(() {
