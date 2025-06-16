@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/livro.dart';
+import '../persistence/livro_dao.dart';
 import '../widgets/livrolumina_appbar.dart';
 import '../widgets/livrolumina_bottomnav.dart';
 import 'carrinho_page.dart';
@@ -17,8 +18,38 @@ class EditarLivroPage extends StatefulWidget {
 class _EditarLivroPageState extends State<EditarLivroPage> {
   final _formKey = GlobalKey<FormState>();
 
-  String estaAVenda = 'Sim';
+  late TextEditingController _tituloController;
+  late TextEditingController _autorController;
+  late TextEditingController _precoController;
+  late TextEditingController _imagemController;
+  late TextEditingController _descricaoController;
+  late String _quantidadeSelecionada;
+  late String _estaAVenda;
+
   final List<String> opcoesVenda = ['Sim', 'Não'];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _tituloController = TextEditingController(text: widget.livro.titulo);
+    _autorController = TextEditingController(text: widget.livro.autor);
+    _precoController = TextEditingController(text: widget.livro.preco.toStringAsFixed(2));
+    _imagemController = TextEditingController(text: widget.livro.urlImagem ?? '');
+    _descricaoController = TextEditingController(text: widget.livro.descricao ?? '');
+    _quantidadeSelecionada = widget.livro.quantidade.toString();
+    _estaAVenda = widget.livro.estaAVenda ? 'Sim' : 'Não';
+  }
+
+  @override
+  void dispose() {
+    _tituloController.dispose();
+    _autorController.dispose();
+    _precoController.dispose();
+    _imagemController.dispose();
+    _descricaoController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,18 +71,17 @@ class _EditarLivroPageState extends State<EditarLivroPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              _buildTextField('Título', 'Título', 'Aprendendo Flutter'),
+              _buildTextField('Título', _tituloController, 'Título'),
               const SizedBox(height: 12),
-              _buildTextField('Autor', 'Ex: Thomas Emerson', 'Thomas Emerson'),
+              _buildTextField('Autor', _autorController, 'Ex: Thomas Emerson'),
               const SizedBox(height: 12),
-              _buildTextField('Preço Unitário', 'Ex: 15,00', '29,90'),
+              _buildTextField('Preço', _precoController, 'Ex: 29.90'),
               const SizedBox(height: 12),
-              _buildTextField('URL da imagem (opcional)', 'Ex: https://ex.com/img/photo.jpg',
-                  'https://example.com/flutter.jpg'),
+              _buildTextField('URL da imagem', _imagemController, 'https://example.com/flutter.jpg'),
               const SizedBox(height: 12),
-              _buildDropdownField('Quantidade', '5'),
+              _buildDropdownField('Quantidade', _quantidadeSelecionada),
               const SizedBox(height: 12),
-              _buildMultilineTextField('Descrição', 'Ex: Este livro traz dicas...', 'Guia completo para aprender Flutter e Dart.'),
+              _buildMultilineTextField('Descrição', _descricaoController, 'Ex: Este livro traz dicas...'),
               const SizedBox(height: 12),
               _buildVendaDropdown(),
               const SizedBox(height: 24),
@@ -59,36 +89,16 @@ class _EditarLivroPageState extends State<EditarLivroPage> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.brown,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      onPressed: () => Navigator.pop(context),
+                      style: _cancelarStyle(),
                       child: const Text('Cancelar'),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          // Salvar alterações do livro
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      onPressed: _salvarAlteracoes,
+                      style: _salvarStyle(),
                       child: const Text('Salvar alterações'),
                     ),
                   ),
@@ -117,14 +127,15 @@ class _EditarLivroPageState extends State<EditarLivroPage> {
     );
   }
 
-  Widget _buildTextField(String label, String hint, String initialValue) {
+  Widget _buildTextField(String label, TextEditingController controller, String hint) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: _labelStyle()),
         const SizedBox(height: 4),
         TextFormField(
-          initialValue: initialValue,
+          controller: controller,
+          validator: (value) => value == null || value.isEmpty ? 'Campo obrigatório' : null,
           decoration: _inputDecoration(hint),
         ),
       ],
@@ -140,24 +151,25 @@ class _EditarLivroPageState extends State<EditarLivroPage> {
         DropdownButtonFormField<String>(
           value: selectedValue,
           decoration: _inputDecoration(''),
-          items: List.generate(20, (index) => (index + 1).toString())
+          items: List.generate(100, (i) => (i + 1).toString())
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
-          onChanged: (value) {},
+          onChanged: (value) => setState(() => _quantidadeSelecionada = value!),
         ),
       ],
     );
   }
 
-  Widget _buildMultilineTextField(String label, String hint, String initialValue) {
+  Widget _buildMultilineTextField(String label, TextEditingController controller, String hint) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: _labelStyle()),
         const SizedBox(height: 4),
         TextFormField(
+          controller: controller,
           maxLines: 4,
-          initialValue: initialValue,
+          validator: (value) => value == null || value.isEmpty ? 'Campo obrigatório' : null,
           decoration: _inputDecoration(hint),
         ),
       ],
@@ -171,19 +183,37 @@ class _EditarLivroPageState extends State<EditarLivroPage> {
         Text('Está à venda?', style: _labelStyle()),
         const SizedBox(height: 4),
         DropdownButtonFormField<String>(
-          value: estaAVenda,
+          value: _estaAVenda,
           decoration: _inputDecoration(''),
-          items: opcoesVenda
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
-          onChanged: (value) {
-            setState(() {
-              estaAVenda = value!;
-            });
-          },
+          items: opcoesVenda.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+          onChanged: (value) => setState(() => _estaAVenda = value!),
         ),
       ],
     );
+  }
+
+  void _salvarAlteracoes() async {
+    if (_formKey.currentState!.validate()) {
+      final livroAtualizado = widget.livro.copyWith(
+        titulo: _tituloController.text,
+        autor: _autorController.text,
+        preco: double.tryParse(_precoController.text) ?? 0.0,
+        urlImagem: _imagemController.text,
+        quantidade: int.tryParse(_quantidadeSelecionada) ?? 1,
+        descricao: _descricaoController.text,
+        estaAVenda: _estaAVenda == 'Sim',
+      );
+
+      await LivroDao().updateLivro(livroAtualizado);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Livro atualizado com sucesso!')),
+        );
+
+        Navigator.pop(context, true); // <- retornar à tela anterior
+      }
+    }
   }
 
   InputDecoration _inputDecoration(String hint) {
@@ -198,11 +228,23 @@ class _EditarLivroPageState extends State<EditarLivroPage> {
     );
   }
 
-  TextStyle _labelStyle() {
-    return const TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-      color: Color(0xFF432E2E),
-    );
-  }
+  TextStyle _labelStyle() => const TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    color: Color(0xFF432E2E),
+  );
+
+  ButtonStyle _cancelarStyle() => ElevatedButton.styleFrom(
+    backgroundColor: Colors.brown,
+    foregroundColor: Colors.white,
+    padding: const EdgeInsets.symmetric(vertical: 14),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  );
+
+  ButtonStyle _salvarStyle() => ElevatedButton.styleFrom(
+    backgroundColor: Colors.green,
+    foregroundColor: Colors.white,
+    padding: const EdgeInsets.symmetric(vertical: 14),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  );
 }

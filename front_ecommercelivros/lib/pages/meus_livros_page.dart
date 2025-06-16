@@ -94,13 +94,20 @@ class _MeusLivrosPageState extends State<MeusLivrosPage> {
                         valor: livro.preco,
                         quantidade: livro.quantidade,
                         aVenda: livro.estaAVenda,
-                        onEditar: () {
-                          Navigator.push(
+                        onEditar: () async {
+                          final resultado = await Navigator.push<bool>(
                             context,
                             MaterialPageRoute(
                               builder: (_) => EditarLivroPage(livro: livro),
                             ),
                           );
+
+                          if (resultado == true) {
+                            // Recarrega os livros, pois houve alteração
+                            setState(() {
+                              _livrosFuture = _carregarLivrosDoUsuario();
+                            });
+                          }
                         },
                         onDeletar: () async {
                           await LivroDao().deleteLivro(livro.id!);

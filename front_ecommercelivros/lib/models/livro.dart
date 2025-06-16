@@ -48,4 +48,29 @@ class Livro {
       usuarioId: map['usuario_id'],
     );
   }
+
+  Livro copyWith({
+    int? id,
+    String? titulo,
+    String? autor,
+    double? preco,
+    String? urlImagem,
+    int? quantidade,
+    String? descricao,
+    bool? estaAVenda,
+    int? usuarioId,
+  }) {
+    return Livro(
+      id: id ?? this.id,
+      titulo: titulo ?? this.titulo,
+      autor: autor ?? this.autor,
+      preco: preco ?? this.preco,
+      urlImagem: urlImagem ?? this.urlImagem,
+      quantidade: quantidade ?? this.quantidade,
+      descricao: descricao ?? this.descricao,
+      estaAVenda: estaAVenda ?? this.estaAVenda,
+      usuarioId: usuarioId ?? this.usuarioId,
+    );
+  }
+
 }
