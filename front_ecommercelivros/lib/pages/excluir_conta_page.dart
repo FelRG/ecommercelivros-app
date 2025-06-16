@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:front_ecommercelivros/widgets/livrolumina_appbar.dart';
 import 'package:front_ecommercelivros/widgets/livrolumina_bottomnav.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../persistence/user_dao.dart';
 import 'carrinho_page.dart';
 import 'home_page.dart';
 import 'login_page.dart';
@@ -60,16 +62,32 @@ class ExcluirContaPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // Aqui você pode adicionar a lógica real de exclusão da conta, como:
-                  // await AuthService().deleteAccount();
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  final userId = prefs.getInt('usuario_id');
 
-                  // Após a exclusão, redireciona para a tela de login:
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginPage()),
-                        (Route<dynamic> route) => false,
-                  );
+                  if (userId != null) {
+                    // 1. Excluir do banco local
+                    await UserDao().deleteUser(userId);
+
+                    // 2. Limpar cache
+                    await prefs.remove('usuario_id');
+                    await prefs.remove('usuario_nome');
+                    await prefs.remove('usuario_email');
+                    await prefs.remove('usuario_senha');
+
+                    // 3. Redirecionar para login
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginPage()),
+                          (Route<dynamic> route) => false,
+                    );
+                  } else {
+                    // Caso ocorra algum erro ou usuário não encontrado
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Erro ao excluir conta.')),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF5A5F),

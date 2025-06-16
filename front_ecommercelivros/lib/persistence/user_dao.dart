@@ -39,4 +39,14 @@ class UserDao {
     );
   }
 
+  Future<int> deleteUser(int id) async {
+    final db = await AppDatabase().database;
+    return await db.delete(
+      table,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+
 }
