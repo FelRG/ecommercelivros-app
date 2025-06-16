@@ -19,6 +19,9 @@ class AuthService {
     if (user != null) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('usuario_id', user.id!);
+      await prefs.setString('usuario_nome', user.name);
+      await prefs.setString('usuario_email', user.email);
+      await prefs.setString('usuario_senha', user.password);
     }
     return user;
   }
@@ -27,14 +30,14 @@ class AuthService {
   //   return await _userDao.getUser(email, password);
   // }
 
-  Future<int?> getUsuarioIdLogado() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('usuario_id');
-  }
+  // Future<int?> getUsuarioIdLogado() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   return prefs.getInt('usuario_id');
+  // }
 
-  Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('usuario_id');
-  }
+  // Future<void> logout() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.remove('usuario_id');
+  // }
 
 }

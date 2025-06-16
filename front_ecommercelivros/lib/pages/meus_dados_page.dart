@@ -1,12 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:front_ecommercelivros/models/user.dart';
+import 'package:front_ecommercelivros/persistence/user_dao.dart';
 import 'package:front_ecommercelivros/widgets/livrolumina_appbar.dart';
 import 'package:front_ecommercelivros/widgets/livrolumina_bottomnav.dart';
+import '../persistence/user_dao.dart';
 import 'carrinho_page.dart';
 import 'home_page.dart';
 import 'menu_page.dart';
 
-class MeusDadosPage extends StatelessWidget {
+class MeusDadosPage extends StatefulWidget {
   const MeusDadosPage({super.key});
+
+  @override
+  State<MeusDadosPage> createState() => _MeusDadosPageState();
+}
+
+class _MeusDadosPageState extends State<MeusDadosPage> {
+  final _nomeController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _senhaController = TextEditingController();
+
+  int? _userId;
+
+  @override
+  void initState() {
+    super.initState();
+    carregarDadosUsuario();
+  }
+
+  Future<void> carregarDadosUsuario() async {
+    final prefs = await SharedPreferences.getInstance();
+    final id = prefs.getInt('usuario_id');
+
+    if (id != null) {
+      final db = UserDao();
+      final usuario = await db.getUserById(id);
+      if (usuario != null) {
+        setState(() {
+          _userId = usuario.id;
+          _nomeController.text = usuario.name;
+          _emailController.text = usuario.email;
+          _senhaController.text = usuario.password;
+        });
+      }
+    }
+  }
+
+  Future<void> atualizarDados() async {
+    if (_userId == null) return;
+
+    final user = User(
+      id: _userId,
+      name: _nomeController.text,
+      email: _emailController.text,
+      password: _senhaController.text,
+    );
+
+    await UserDao().updateUser(user);
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('usuario_nome', user.name);
+    await prefs.setString('usuario_email', user.email);
+    await prefs.setString('usuario_senha', user.password);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Dados atualizados com sucesso')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +92,7 @@ class MeusDadosPage extends StatelessWidget {
                 style: TextStyle(fontSize: 16, color: Color(0xFF3B2E2A))),
             const SizedBox(height: 4),
             TextFormField(
-              initialValue: 'Fulano de tal',
-              readOnly: true,
+              controller: _nomeController,
               decoration: _inputDecoration(),
             ),
             const SizedBox(height: 16),
@@ -41,8 +101,7 @@ class MeusDadosPage extends StatelessWidget {
                 style: TextStyle(fontSize: 16, color: Color(0xFF3B2E2A))),
             const SizedBox(height: 4),
             TextFormField(
-              initialValue: 'fulanodetal@gmail.com',
-              readOnly: true,
+              controller: _emailController,
               decoration: _inputDecoration(),
             ),
             const SizedBox(height: 16),
@@ -51,8 +110,7 @@ class MeusDadosPage extends StatelessWidget {
                 style: TextStyle(fontSize: 16, color: Color(0xFF3B2E2A))),
             const SizedBox(height: 4),
             TextFormField(
-              initialValue: '*******',
-              readOnly: true,
+              controller: _senhaController,
               obscureText: true,
               decoration: _inputDecoration().copyWith(
                 suffixIcon: const Icon(Icons.lock_outline),
@@ -80,9 +138,7 @@ class MeusDadosPage extends StatelessWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-
-                    },
+                    onPressed: atualizarDados,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,

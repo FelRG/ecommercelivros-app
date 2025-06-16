@@ -18,4 +18,25 @@ class UserDao {
     );
     return result.isNotEmpty ? User.fromMap(result.first) : null;
   }
+
+  Future<User?> getUserById(int id) async {
+    final db = await AppDatabase().database;
+    final result = await db.query(
+      table,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return result.isNotEmpty ? User.fromMap(result.first) : null;
+  }
+
+  Future<int> updateUser(User user) async {
+    final db = await AppDatabase().database;
+    return db.update(
+      table,
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
+  }
+
 }

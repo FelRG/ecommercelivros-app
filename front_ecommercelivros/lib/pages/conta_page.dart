@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:front_ecommercelivros/widgets/livrolumina_appbar.dart';
 import 'package:front_ecommercelivros/widgets/livrolumina_bottomnav.dart';
 import 'carrinho_page.dart';
@@ -8,11 +9,28 @@ import 'meus_dados_page.dart';
 import 'meus_pedidos_page.dart';
 import 'excluir_conta_page.dart';
 
-
-
-
-class ContaPage extends StatelessWidget {
+class ContaPage extends StatefulWidget {
   const ContaPage({super.key});
+
+  @override
+  State<ContaPage> createState() => _ContaPageState();
+}
+
+class _ContaPageState extends State<ContaPage> {
+  String _nomeUsuario = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarNomeUsuario();
+  }
+
+  Future<void> _carregarNomeUsuario() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _nomeUsuario = prefs.getString('usuario_nome') ?? 'Usuário';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,12 +49,24 @@ class ContaPage extends StatelessWidget {
                 color: Color(0xFF4C3A32),
               ),
             ),
+            const SizedBox(height: 16),
+            // Exibindo "Olá, {nomeDoUsuario}"
+            Text(
+              'Olá, $_nomeUsuario!',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF4C3A32),
+              ),
+            ),
             const SizedBox(height: 32),
-            _buildOptionButton(context, 'Meus dados', () {
-              Navigator.push(
+            _buildOptionButton(context, 'Meus dados', () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const MeusDadosPage()),
               );
+              // Após retornar da MeusDadosPage, recarrega o nome atualizado da cache
+              await _carregarNomeUsuario();
             }),
             const SizedBox(height: 16),
             _buildOptionButton(context, 'Meus pedidos', () {

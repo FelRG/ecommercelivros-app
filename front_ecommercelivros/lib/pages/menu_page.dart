@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:front_ecommercelivros/widgets/livrolumina_appbar.dart';
 import 'package:front_ecommercelivros/widgets/livrolumina_bottomnav.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'adicionar_livro_venda_page.dart';
 import 'carrinho_page.dart';
 import 'conta_page.dart';
@@ -56,13 +57,17 @@ class MenuPage extends StatelessWidget {
             _buildMenuButton(
               context,
               title: 'Sair',
-              onTap: () {
+              onTap: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.clear(); // Limpa todas as chaves do SharedPreferences
+
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (_) => const LoginPage()),
                       (route) => false,
                 );
               },
+
             ),
           ],
         ),
