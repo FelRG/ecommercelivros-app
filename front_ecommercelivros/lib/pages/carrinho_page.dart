@@ -3,8 +3,10 @@ import 'package:front_ecommercelivros/widgets/livrolumina_appbar.dart';
 import 'package:front_ecommercelivros/widgets/livrolumina_bottomnav.dart';
 import 'package:front_ecommercelivros/widgets/produto_card_carrinho.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/database.dart';
 import '../persistence/carrinho_dao.dart';
 
+import '../persistence/compra_dao.dart';
 import 'conta_page.dart';
 import 'home_page.dart';
 import 'menu_page.dart';
@@ -45,6 +47,24 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
     });
   }
 
+  Future<void> realizarCompra() async {
+    final compraDao = CompraDao();
+    await compraDao.realizarCompra(produtos);
+
+    // Atualizar interface
+    // setState(() {
+    //   produtos = [];
+    // });
+
+    // Atualizar interface
+    _carregarCarrinho(); // recarrega os dados do carrinho atualizados
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Compra realizada com sucesso!')),
+    );
+  }
+
+
 
   // final List<Map<String, dynamic>> produtos = [
   //   {'titulo': 'Hygge: The Danish Way To Live Well', 'preco': 36.99},
@@ -78,8 +98,8 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // ação para realizar compra
+                onPressed: () async {
+                  await realizarCompra();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
@@ -98,6 +118,7 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
             Column(
               children: produtos.map((p) {
                 return ProdutoCardCarrinho(
+                  id: p['id'],
                   titulo: p['titulo'],
                   preco: p['preco'],
                   imagemUrl: p['urlImagem'] ?? 'assets/images/iconelivro.jpg',

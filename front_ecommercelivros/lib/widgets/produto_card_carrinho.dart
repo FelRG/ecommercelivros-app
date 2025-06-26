@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ProdutoCardCarrinho extends StatefulWidget {
+  final int id;
   final String titulo;
   final double preco;
   final String imagemUrl;
@@ -10,6 +11,7 @@ class ProdutoCardCarrinho extends StatefulWidget {
 
   const ProdutoCardCarrinho({
     super.key,
+    required this.id,
     required this.titulo,
     required this.preco,
     required this.imagemUrl,

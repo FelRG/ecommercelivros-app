@@ -20,4 +20,5 @@ class CarrinhoDao {
       WHERE c.usuario_id = ?
     ''', [usuarioId]);
   }
+
 }

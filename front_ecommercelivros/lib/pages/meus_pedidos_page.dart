@@ -4,10 +4,43 @@ import 'package:front_ecommercelivros/widgets/livrolumina_bottomnav.dart';
 import 'package:front_ecommercelivros/pages/home_page.dart';
 import 'package:front_ecommercelivros/pages/carrinho_page.dart';
 import 'package:front_ecommercelivros/pages/menu_page.dart';
-import 'package:front_ecommercelivros/widgets/pedido_card.dart'; // widget criado
+import 'package:front_ecommercelivros/widgets/pedido_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class MeusPedidosPage extends StatelessWidget {
+import '../persistence/compra_dao.dart'; // widget criado
+
+class MeusPedidosPage extends StatefulWidget {
   const MeusPedidosPage({super.key});
+
+  @override
+  State<MeusPedidosPage> createState() => _MeusPedidosPageState();
+}
+
+class _MeusPedidosPageState extends State<MeusPedidosPage> {
+  List<Map<String, dynamic>> pedidos = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarPedidos();
+  }
+
+  Future<void> _carregarPedidos() async {
+    final prefs = await SharedPreferences.getInstance();
+    final usuarioId = prefs.getInt('usuario_id');
+
+    if (usuarioId == null) {
+      // Tratar usuário não logado, por exemplo, mostrando mensagem ou redirecionando
+      return;
+    }
+
+    final compraDao = CompraDao();
+    final dadosPedidos = await compraDao.getComprasUsuario(usuarioId);
+
+    setState(() {
+      pedidos = dadosPedidos;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,16 +61,19 @@ class MeusPedidosPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: ListView.builder(
-                itemCount: 6, // exemplo com 6 pedidos
+              child: pedidos.isEmpty
+                  ? const Center(child: Text('Nenhum pedido encontrado.'))
+                  : ListView.builder(
+                itemCount: pedidos.length,
                 itemBuilder: (context, index) {
-                  return const PedidoCard(
-                    imagemUrl: 'assets/images/iconelivro.jpg',
-                    titulo: 'A natureza das sombras',
-                    quantidade: 2,
-                    valorTotal: 60.00,
-                    numeroPedido: 375,
-                    data: '13/07/2024',
+                  final pedido = pedidos[index];
+                  return PedidoCard(
+                    imagemUrl: pedido['imagemUrl'] ?? 'assets/images/iconelivro.jpg',
+                    titulo: pedido['titulo'] ?? 'Pedido sem título',
+                    quantidade: pedido['quantidade_total'] ?? 0,
+                    valorTotal: pedido['total']?.toDouble() ?? 0,
+                    numeroPedido: pedido['compra_id'],
+                    data: pedido['data_compra'] ?? '',
                   );
                 },
               ),
@@ -73,3 +109,4 @@ class MeusPedidosPage extends StatelessWidget {
     );
   }
 }
+

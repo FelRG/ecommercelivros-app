@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class PedidoCard extends StatelessWidget {
   final String imagemUrl;
@@ -19,7 +20,40 @@ class PedidoCard extends StatelessWidget {
   });
 
   @override
+
+  String _formatarData(String dataIso) {
+    try {
+      final dateTime = DateTime.parse(dataIso);
+      return DateFormat('dd/MM/yyyy').format(dateTime);
+    } catch (e) {
+      return dataIso; // fallback caso a conversão falhe
+    }
+  }
+
   Widget build(BuildContext context) {
+    final bool isImageUrlExterna = imagemUrl.startsWith('http');
+    final Widget imagemWidget = isImageUrlExterna
+        ? Image.network(
+      imagemUrl,
+      width: 60,
+      height: 80,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Image.asset(
+          'assets/images/iconelivro.jpg',
+          width: 60,
+          height: 80,
+          fit: BoxFit.cover,
+        );
+      },
+    )
+        : Image.asset(
+      imagemUrl.isNotEmpty ? imagemUrl : 'assets/images/iconelivro.jpg',
+      width: 60,
+      height: 80,
+      fit: BoxFit.cover,
+    );
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(8),
@@ -31,12 +65,7 @@ class PedidoCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
-            child: Image.asset(
-              imagemUrl,
-              width: 60,
-              height: 80,
-              fit: BoxFit.cover,
-            ),
+            child: imagemWidget,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -75,7 +104,7 @@ class PedidoCard extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                data,
+                _formatarData(data),
                 style: const TextStyle(fontSize: 13),
               ),
             ],
