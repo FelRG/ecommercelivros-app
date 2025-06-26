@@ -5,12 +5,18 @@ class ProdutoCard extends StatelessWidget {
   final String titulo;
   final String preco;
   final String imagemUrl;
+  final String autor;
+  final int quantidade;
+  final String? descricao;
 
   const ProdutoCard({
     super.key,
     required this.titulo,
     required this.preco,
     required this.imagemUrl,
+    required this.autor,
+    required this.quantidade,
+    this.descricao,
   });
 
   @override
@@ -28,6 +34,9 @@ class ProdutoCard extends StatelessWidget {
               titulo: titulo,
               preco: preco,
               imagemUrl: imagemUrl,
+              autor: autor,
+              quantidade: quantidade,
+              descricao: descricao,
             ),
           ),
         );

@@ -76,6 +76,9 @@ class _HomePageState extends State<HomePage> {
                   titulo: livro.titulo,
                   preco: 'R\$ ${livro.preco.toStringAsFixed(2)}',
                   imagemUrl: livro.urlImagem ?? 'assets/images/iconelivro.jpg',
+                  autor: livro.autor,
+                  quantidade: livro.quantidade,
+                  descricao: livro.descricao,
                 );
               }).toList(),
             ),

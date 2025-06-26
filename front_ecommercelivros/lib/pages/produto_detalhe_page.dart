@@ -6,12 +6,18 @@ class ProdutoDetalhePage extends StatefulWidget {
   final String titulo;
   final String preco;
   final String imagemUrl;
+  final String autor;
+  final int quantidade;
+  final String? descricao;
 
   const ProdutoDetalhePage({
     super.key,
     required this.titulo,
     required this.preco,
     required this.imagemUrl,
+    required this.autor,
+    required this.quantidade,
+    this.descricao,
   });
 
   @override
@@ -76,15 +82,21 @@ class _ProdutoDetalhePageState extends State<ProdutoDetalhePage> {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Por Anderson Tsar', // Ou passe como parâmetro depois
-              style: TextStyle(
+            Text(
+              'Por ${widget.autor}',
+              style: const TextStyle(
                 fontSize: 14,
                 fontStyle: FontStyle.italic,
                 color: Colors.black54,
               ),
             ),
             const SizedBox(height: 12),
+
+            // if (widget.descricao != null && widget.descricao!.isNotEmpty)
+            //   Text(
+            //     widget.descricao!,
+            //     style: const TextStyle(fontSize: 16),
+            //   ),
             Text(
               widget.preco,
               style: const TextStyle(
@@ -104,7 +116,7 @@ class _ProdutoDetalhePageState extends State<ProdutoDetalhePage> {
                 underline: const SizedBox(),
                 isExpanded: true,
                 items: List.generate(
-                  10,
+                    widget.quantidade,
                       (index) => DropdownMenuItem(
                     value: index + 1,
                     child: Text('Quantidade: ${index + 1}'),
