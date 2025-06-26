@@ -15,6 +15,10 @@ class ProdutoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Valida se é uma URL de rede (http/https)
+    Uri? uri = Uri.tryParse(imagemUrl);
+    bool isUrlValida = uri != null && uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https');
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -40,8 +44,21 @@ class ProdutoCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-              child: Image.asset(
+              child: isUrlValida
+                  ? Image.network(
                 imagemUrl,
+                height: 140,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Image.asset(
+                  'assets/images/iconelivro.jpg',
+                  height: 140,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              )
+                  : Image.asset(
+                'assets/images/iconelivro.jpg',
                 height: 140,
                 width: double.infinity,
                 fit: BoxFit.cover,

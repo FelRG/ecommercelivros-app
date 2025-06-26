@@ -39,11 +39,11 @@ class MeuLivroCard extends StatelessWidget {
               width: 70,
               height: 90,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
+              errorBuilder: (context, error, stackTrace) => Image.asset(
+                'assets/images/iconelivro.jpg',
                 width: 70,
                 height: 90,
-                color: Colors.grey[300],
-                child: const Icon(Icons.broken_image, color: Colors.grey),
+                fit: BoxFit.cover,
               ),
             ),
           ),

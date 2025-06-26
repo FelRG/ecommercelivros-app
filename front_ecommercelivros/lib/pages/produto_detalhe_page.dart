@@ -21,8 +21,13 @@ class ProdutoDetalhePage extends StatefulWidget {
 class _ProdutoDetalhePageState extends State<ProdutoDetalhePage> {
   int quantidadeSelecionada = 1;
 
+
   @override
   Widget build(BuildContext context) {
+
+    Uri? uri = Uri.tryParse(widget.imagemUrl);
+    bool isUrlValida = uri != null && uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https');
+
     return Scaffold(
       appBar: const LivroLuminaAppBar(),
       body: SingleChildScrollView(
@@ -30,13 +35,39 @@ class _ProdutoDetalhePageState extends State<ProdutoDetalhePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(
+            // Image.network(
+            //   widget.imagemUrl,
+            //   height: 220,
+            //   width: double.infinity,
+            //   fit: BoxFit.cover,
+            //   errorBuilder: (context, error, stackTrace) => Image.asset(
+            //     'assets/images/iconelivro.jpg',
+            //     height: 220,
+            //     width: double.infinity,
+            //     fit: BoxFit.cover,
+            //   ),
+            // ),
+            isUrlValida
+                ? Image.network(
               widget.imagemUrl,
               height: 220,
               width: double.infinity,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Image.asset(
+                'assets/images/iconelivro.jpg',
+                height: 220,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            )
+                : Image.asset(
+              'assets/images/iconelivro.jpg',
+              height: 220,
+              width: double.infinity,
+              fit: BoxFit.cover,
             ),
-            const SizedBox(height: 16),
+
+    const SizedBox(height: 16),
             Text(
               widget.titulo,
               style: const TextStyle(
