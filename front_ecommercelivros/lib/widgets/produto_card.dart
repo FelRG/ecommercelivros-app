@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../pages/produto_detalhe_page.dart';
 
 class ProdutoCard extends StatelessWidget {
+  final int id;
   final String titulo;
   final String preco;
   final String imagemUrl;
@@ -11,6 +12,7 @@ class ProdutoCard extends StatelessWidget {
 
   const ProdutoCard({
     super.key,
+    required this.id,
     required this.titulo,
     required this.preco,
     required this.imagemUrl,
@@ -31,6 +33,7 @@ class ProdutoCard extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (_) => ProdutoDetalhePage(
+              id: id,
               titulo: titulo,
               preco: preco,
               imagemUrl: imagemUrl,

@@ -73,6 +73,7 @@ class _HomePageState extends State<HomePage> {
               runSpacing: 8,
               children: _livros.map((livro) {
                 return ProdutoCard(
+                  id: livro.id!,
                   titulo: livro.titulo,
                   preco: 'R\$ ${livro.preco.toStringAsFixed(2)}',
                   imagemUrl: livro.urlImagem ?? 'assets/images/iconelivro.jpg',

@@ -1,14 +1,44 @@
 import 'package:flutter/material.dart';
 
 class ProdutoCardCarrinho extends StatefulWidget {
-  const ProdutoCardCarrinho({super.key});
+  final String titulo;
+  final double preco;
+  final String imagemUrl;
+  final int quantidadeInicial;
+  final VoidCallback? onExcluir;
+  final ValueChanged<int>? onQuantidadeAlterada;
+
+  const ProdutoCardCarrinho({
+    super.key,
+    required this.titulo,
+    required this.preco,
+    required this.imagemUrl,
+    required this.quantidadeInicial,
+    this.onExcluir,
+    this.onQuantidadeAlterada,
+  });
 
   @override
   State<ProdutoCardCarrinho> createState() => _ProdutoCardCarrinhoState();
 }
 
 class _ProdutoCardCarrinhoState extends State<ProdutoCardCarrinho> {
-  int quantidade = 1;
+  late int quantidade;
+
+  @override
+  void initState() {
+    super.initState();
+    quantidade = widget.quantidadeInicial;
+  }
+
+  void _alterarQuantidade(int novaQuantidade) {
+    setState(() {
+      quantidade = novaQuantidade;
+    });
+    if (widget.onQuantidadeAlterada != null) {
+      widget.onQuantidadeAlterada!(quantidade);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,35 +47,40 @@ class _ProdutoCardCarrinhoState extends State<ProdutoCardCarrinho> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Row(
         children: [
-          // Imagem do produto
           ClipRRect(
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
               bottomLeft: Radius.circular(12),
             ),
-            child: Image.asset(
-              'assets/images/iconelivro.jpg', // Substitua com o caminho correto da imagem
-              width: 120,
-              height: 160,
-              fit: BoxFit.cover,
+            child: SizedBox(
+              width: 100, // limite seguro
+              height: 140,
+              child: widget.imagemUrl.startsWith('http')
+                  ? Image.network(
+                widget.imagemUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Image.asset('assets/images/iconelivro.jpg', fit: BoxFit.cover),
+              )
+                  : Image.asset(
+                'assets/images/iconelivro.jpg',
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-
-          // Detalhes do produto
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Hygge: The Danish Way To Live Well',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  Text(
+                    widget.titulo,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'R\$ 36,99',
-                    style: TextStyle(
+                  Text(
+                    'R\$ ${widget.preco.toStringAsFixed(2)}',
+                    style: const TextStyle(
                       fontSize: 16,
                       color: Colors.black87,
                       fontWeight: FontWeight.w500,
@@ -61,11 +96,9 @@ class _ProdutoCardCarrinhoState extends State<ProdutoCardCarrinho> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove),
-                        onPressed: () {
-                          if (quantidade > 1) {
-                            setState(() => quantidade--);
-                          }
-                        },
+                        onPressed: quantidade > 1
+                            ? () => _alterarQuantidade(quantidade - 1)
+                            : null,
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -81,9 +114,7 @@ class _ProdutoCardCarrinhoState extends State<ProdutoCardCarrinho> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.add),
-                        onPressed: () {
-                          setState(() => quantidade++);
-                        },
+                        onPressed: () => _alterarQuantidade(quantidade + 1),
                       ),
                     ],
                   ),
@@ -96,9 +127,7 @@ class _ProdutoCardCarrinhoState extends State<ProdutoCardCarrinho> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed: () {
-                      // lógica de exclusão
-                    },
+                    onPressed: widget.onExcluir,
                     child: const Text('Excluir'),
                   ),
                 ],
@@ -110,3 +139,4 @@ class _ProdutoCardCarrinhoState extends State<ProdutoCardCarrinho> {
     );
   }
 }
+

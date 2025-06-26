@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/carrinho.dart';
+import '../persistence/carrinho_dao.dart';
 import '../widgets/livrolumina_appbar.dart';
 
 class ProdutoDetalhePage extends StatefulWidget {
+  final int id;
   final String titulo;
   final String preco;
   final String imagemUrl;
@@ -12,6 +16,7 @@ class ProdutoDetalhePage extends StatefulWidget {
 
   const ProdutoDetalhePage({
     super.key,
+    required this.id,
     required this.titulo,
     required this.preco,
     required this.imagemUrl,
@@ -133,8 +138,29 @@ class _ProdutoDetalhePageState extends State<ProdutoDetalhePage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // lógica para adicionar ao carrinho
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  final idUsuarioLogado = prefs.getInt('usuario_id');
+
+                  if (idUsuarioLogado == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Usuário não está logado.')),
+                    );
+                    return;
+                  }
+
+                  final carrinhoDao = CarrinhoDao();
+                  await carrinhoDao.adicionarAoCarrinho(
+                    Carrinho(
+                      usuarioId: idUsuarioLogado,
+                      livroId: widget.id,
+                      quantidade: quantidadeSelecionada,
+                    ),
+                  );
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Livro adicionado ao carrinho!')),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFF1C40F), // amarelo
