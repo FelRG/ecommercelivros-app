@@ -44,4 +44,19 @@ class LivroDao {
       whereArgs: [livro.id],
     );
   }
+
+  Future<List<Livro>> buscarLivrosPorTermo(String termo) async {
+    final db = await AppDatabase().database;
+
+    final termoFormatado = '%$termo%';
+
+    final maps = await db.query(
+      table,
+      where: '(titulo LIKE ? OR autor LIKE ?) AND estaAVenda = ? AND quantidade > 0',
+      whereArgs: [termoFormatado, termoFormatado, 1],
+    );
+
+    return maps.map((map) => Livro.fromMap(map)).toList();
+  }
+
 }
