@@ -151,7 +151,7 @@ class _EditarLivroPageState extends State<EditarLivroPage> {
         DropdownButtonFormField<String>(
           value: selectedValue,
           decoration: _inputDecoration(''),
-          items: List.generate(100, (i) => (i + 1).toString())
+          items: List.generate(101, (i) => i.toString()) // de 0 a 100
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
           onChanged: (value) => setState(() => _quantidadeSelecionada = value!),
@@ -193,13 +193,16 @@ class _EditarLivroPageState extends State<EditarLivroPage> {
   }
 
   void _salvarAlteracoes() async {
+
     if (_formKey.currentState!.validate()) {
+      final novaQuantidade = int.tryParse(_quantidadeSelecionada) ?? 0;
+
       final livroAtualizado = widget.livro.copyWith(
         titulo: _tituloController.text,
         autor: _autorController.text,
         preco: double.tryParse(_precoController.text) ?? 0.0,
         urlImagem: _imagemController.text,
-        quantidade: int.tryParse(_quantidadeSelecionada) ?? 1,
+        quantidade: novaQuantidade,
         descricao: _descricaoController.text,
         estaAVenda: _estaAVenda == 'Sim',
       );

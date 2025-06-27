@@ -5,7 +5,6 @@ import 'package:front_ecommercelivros/widgets/produto_card_carrinho.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/database.dart';
 import '../persistence/carrinho_dao.dart';
-
 import '../persistence/compra_dao.dart';
 import 'conta_page.dart';
 import 'home_page.dart';
@@ -20,6 +19,7 @@ class CarrinhoPage extends StatefulWidget {
 
 class _CarrinhoPageState extends State<CarrinhoPage> {
   List<Map<String, dynamic>> produtos = [];
+  int? usuarioId;
 
   @override
   void initState() {
@@ -27,12 +27,11 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
     _carregarCarrinho();
   }
 
-  void _carregarCarrinho() async {
+  Future<void> _carregarCarrinho() async {
     final prefs = await SharedPreferences.getInstance();
-    final usuarioId = prefs.getInt('usuario_id');
+    usuarioId = prefs.getInt('usuario_id');
 
     if (usuarioId == null) {
-      // Pode mostrar mensagem, ou redirecionar para login
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Usuário não está logado.')),
       );
@@ -40,54 +39,71 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
     }
 
     final carrinhoDao = CarrinhoDao();
-    final resultados = await carrinhoDao.getCarrinhoCompleto(usuarioId);
+    final resultados = await carrinhoDao.getCarrinhoCompleto(usuarioId!);
 
     setState(() {
       produtos = resultados;
     });
   }
 
-  Future<void> realizarCompra() async {
-    final compraDao = CompraDao();
-    await compraDao.realizarCompra(produtos);
-
-    // Atualizar interface
-    // setState(() {
-    //   produtos = [];
-    // });
-
-    // Atualizar interface
-    _carregarCarrinho(); // recarrega os dados do carrinho atualizados
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Compra realizada com sucesso!')),
-    );
+  Future<void> _excluirProduto(int produtoId) async {
+    final carrinhoDao = CarrinhoDao();
+    await carrinhoDao.removerDoCarrinho(produtoId);
+    _carregarCarrinho();
   }
 
+  Future<void> _atualizarQuantidade(int produtoId, int novaQuantidade) async {
+    final carrinhoDao = CarrinhoDao();
+    await carrinhoDao.atualizarQuantidade(produtoId, novaQuantidade);
+    _carregarCarrinho();
+  }
 
+  Future<void> realizarCompra() async {
+    final compraDao = CompraDao();
 
-  // final List<Map<String, dynamic>> produtos = [
-  //   {'titulo': 'Hygge: The Danish Way To Live Well', 'preco': 36.99},
-  //   {'titulo': 'Hygge: The Danish Way To Live Well', 'preco': 36.99},
-  // ];
+    try {
+      await compraDao.realizarCompra(produtos);
+      _carregarCarrinho();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Compra realizada com sucesso!')),
+      );
+    } catch (e) {
+      // Mostra erro caso não tenha estoque suficiente ou outro erro qualquer
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString().replaceAll('Exception: ', ''),
+            style: const TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
 
   double get subtotal =>
       produtos.fold(0, (soma, p) => soma + (p['preco'] * p['quantidade']));
 
-  // @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const LivroLuminaAppBar(),
-      body: SingleChildScrollView(
+      body: produtos.isEmpty
+          ? const Center(
+        child: Text(
+          'Nenhum livro no carrinho.'
+        ),
+      )
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'Carrinho',
-              style: TextStyle(fontSize: 24,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF4C3A32),),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500, color: Color(0xFF4C3A32)),
             ),
             const SizedBox(height: 8),
             Text(
@@ -98,9 +114,7 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () async {
-                  await realizarCompra();
-                },
+                onPressed: realizarCompra,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   padding: const EdgeInsets.symmetric(vertical: 14),
@@ -118,23 +132,21 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
             Column(
               children: produtos.map((p) {
                 return ProdutoCardCarrinho(
-                  id: p['id'],
+                  id: p['carrinho_id'],
                   titulo: p['titulo'],
                   preco: p['preco'],
                   imagemUrl: p['urlImagem'] ?? 'assets/images/iconelivro.jpg',
                   quantidadeInicial: p['quantidade'],
-                  onExcluir: () {
-                    // aqui você remove o item do carrinho e chama setState
-                  },
-                  onQuantidadeAlterada: (novaQtd) {
-                    // aqui você atualiza a quantidade no banco e no estado
-                  },
+                  onExcluir: () => _excluirProduto(p['carrinho_id']),
+                  onQuantidadeAlterada: (novaQtd) =>
+                      _atualizarQuantidade(p['carrinho_id'], novaQtd),
                 );
               }).toList(),
             ),
           ],
         ),
       ),
+
       bottomNavigationBar: LivroLuminaBottomNav(
         currentIndex: 2,
         onTap: (index) {
