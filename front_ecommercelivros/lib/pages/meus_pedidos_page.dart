@@ -68,8 +68,8 @@ class _MeusPedidosPageState extends State<MeusPedidosPage> {
                 itemBuilder: (context, index) {
                   final pedido = pedidos[index];
                   return PedidoCard(
-                    imagemUrl: pedido['imagemUrl'] ?? 'assets/images/iconelivro.jpg',
-                    titulo: pedido['titulo'] ?? 'Pedido sem título',
+                    imagemUrl: 'assets/images/conjuntolivro.jpg',
+                    titulo: 'Pedido número ${pedido['compra_id']}',
                     quantidade: pedido['quantidade_total'] ?? 0,
                     valorTotal: pedido['total']?.toDouble() ?? 0,
                     numeroPedido: pedido['compra_id'],

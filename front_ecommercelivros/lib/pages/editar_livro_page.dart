@@ -82,7 +82,7 @@ class _EditarLivroPageState extends State<EditarLivroPage> {
               const SizedBox(height: 12),
               _buildTextField('Preço', _precoController, 'Ex: 29.90'),
               const SizedBox(height: 12),
-              _buildTextField('URL da imagem', _imagemController, 'https://example.com/flutter.jpg'),
+              _buildTextField('URL da imagem (opcional)', _imagemController, 'https://example.com/flutter.jpg', obrigatorio: false),
               const SizedBox(height: 12),
               Text('Pré-visualização da imagem:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xFF4C3A32))),
               ClipRRect(
@@ -150,7 +150,7 @@ class _EditarLivroPageState extends State<EditarLivroPage> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, String hint) {
+  Widget _buildTextField(String label, TextEditingController controller, String hint, {bool obrigatorio = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -158,12 +158,13 @@ class _EditarLivroPageState extends State<EditarLivroPage> {
         const SizedBox(height: 4),
         TextFormField(
           controller: controller,
-          validator: (value) => value == null || value.isEmpty ? 'Campo obrigatório' : null,
           decoration: _inputDecoration(hint),
+          validator: obrigatorio ? (value) => value == null || value.isEmpty ? 'Campo obrigatório' : null : null,
         ),
       ],
     );
   }
+
 
   Widget _buildDropdownField(String label, String selectedValue) {
     return Column(

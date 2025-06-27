@@ -100,12 +100,13 @@ class _ProdutoDetalhePageState extends State<ProdutoDetalhePage> {
               ),
             ),
             const SizedBox(height: 12),
-
-            // if (widget.descricao != null && widget.descricao!.isNotEmpty)
-            //   Text(
-            //     widget.descricao!,
-            //     style: const TextStyle(fontSize: 16),
-            //   ),
+            if (widget.descricao != null && widget.descricao!.isNotEmpty) ...[
+              Text(
+                widget.descricao!,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 12), // espaço entre descrição e preço
+            ],
             Text(
               widget.preco,
               style: const TextStyle(

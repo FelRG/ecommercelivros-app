@@ -54,7 +54,7 @@ class _AdicionarLivroVendaPageState extends State<AdicionarLivroVendaPage> {
               const SizedBox(height: 12),
               _buildTextField('Preço Unitário', 'Ex: 15,00', _precoController),
               const SizedBox(height: 12),
-              _buildTextField('URL da imagem (opcional)', 'Ex: https://ex.com/img/photo.jpg', _urlImagemController),
+              _buildTextField('URL da imagem (opcional)', 'Ex: https://ex.com/img/photo.jpg', _urlImagemController, obrigatorio: false),
               const SizedBox(height: 12),
               _buildDropdownField('Quantidade', '1'),
               const SizedBox(height: 12),
@@ -153,7 +153,7 @@ class _AdicionarLivroVendaPageState extends State<AdicionarLivroVendaPage> {
     }
   }
 
-  Widget _buildTextField(String label, String hint, TextEditingController controller) {
+  Widget _buildTextField(String label, String hint, TextEditingController controller, {bool obrigatorio = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -162,11 +162,14 @@ class _AdicionarLivroVendaPageState extends State<AdicionarLivroVendaPage> {
         TextFormField(
           controller: controller,
           decoration: _inputDecoration(hint),
-          validator: (value) => value!.isEmpty ? 'Campo obrigatório' : null,
+          validator: obrigatorio
+              ? (value) => value!.isEmpty ? 'Campo obrigatório' : null
+              : null,
         ),
       ],
     );
   }
+
 
   Widget _buildDropdownField(String label, String hint) {
     return Column(
