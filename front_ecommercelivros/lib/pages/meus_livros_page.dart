@@ -21,6 +21,10 @@ class MeusLivrosPage extends StatefulWidget {
 class _MeusLivrosPageState extends State<MeusLivrosPage> {
   late Future<List<Livro>> _livrosFuture;
 
+  bool _isValidUrl(String? url) {
+    return url != null && url.startsWith('http') && Uri.tryParse(url)?.hasAbsolutePath == true;
+  }
+
   Future<List<Livro>> _carregarLivrosDoUsuario() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -90,7 +94,7 @@ class _MeusLivrosPageState extends State<MeusLivrosPage> {
                       final livro = livros[index];
                       return MeuLivroCard(
                         titulo: livro.titulo,
-                        imagemUrl: livro.urlImagem ?? 'assets/images/iconelivro.jpg', // ou outra imagem padrão
+                        imagemUrl: _isValidUrl(livro.urlImagem) ? livro.urlImagem! : 'assets/images/iconelivro.jpg',
                         valor: livro.preco,
                         quantidade: livro.quantidade,
                         aVenda: livro.estaAVenda,

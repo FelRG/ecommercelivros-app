@@ -16,6 +16,11 @@ class EditarLivroPage extends StatefulWidget {
 }
 
 class _EditarLivroPageState extends State<EditarLivroPage> {
+
+  bool _isValidImageUrl(String? url) {
+    return url != null && url.startsWith('http') && Uri.tryParse(url)?.hasAbsolutePath == true;
+  }
+
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _tituloController;
@@ -78,6 +83,24 @@ class _EditarLivroPageState extends State<EditarLivroPage> {
               _buildTextField('Preço', _precoController, 'Ex: 29.90'),
               const SizedBox(height: 12),
               _buildTextField('URL da imagem', _imagemController, 'https://example.com/flutter.jpg'),
+              const SizedBox(height: 12),
+              Text('Pré-visualização da imagem:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Color(0xFF4C3A32))),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: _isValidImageUrl(_imagemController.text)
+                    ? Image.network(
+                  _imagemController.text,
+                  height: 500,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                )
+                    : Image.asset(
+                  'assets/images/iconelivro.jpg',
+                  height: 500,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
               const SizedBox(height: 12),
               _buildDropdownField('Quantidade', _quantidadeSelecionada),
               const SizedBox(height: 12),

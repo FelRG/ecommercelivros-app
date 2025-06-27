@@ -4,6 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/carrinho.dart';
 import '../persistence/carrinho_dao.dart';
 import '../widgets/livrolumina_appbar.dart';
+import '../widgets/livrolumina_bottomnav.dart';
+import 'carrinho_page.dart';
+import 'conta_page.dart';
+import 'menu_page.dart';
 
 class ProdutoDetalhePage extends StatefulWidget {
   final int id;
@@ -181,29 +185,30 @@ class _ProdutoDetalhePageState extends State<ProdutoDetalhePage> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF4C3A32),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white60,
+      bottomNavigationBar: LivroLuminaBottomNav(
         currentIndex: 0,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Início',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Conta',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Carrinho',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
-            label: 'Menu',
-          ),
-        ],
+        onTap: (index) {
+          switch (index) {
+            case 1:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const ContaPage()),
+              );
+              break;
+            case 2:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const CarrinhoPage()),
+              );
+              break;
+            case 3:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const MenuPage()),
+              );
+              break;
+          }
+        },
       ),
     );
   }

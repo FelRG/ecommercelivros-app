@@ -20,11 +20,38 @@ class MeuLivroCard extends StatelessWidget {
     required this.onDeletar,
   });
 
+  bool _isUrlRemota(String url) {
+    return url.startsWith('http://') || url.startsWith('https://');
+  }
+
+  Widget _buildImagem() {
+    if (_isUrlRemota(imagemUrl)) {
+      return Image.network(
+        imagemUrl,
+        width: 70,
+        height: 90,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _imagemPadrao(),
+      );
+    } else {
+      return _imagemPadrao();
+    }
+  }
+
+  Widget _imagemPadrao() {
+    return Image.asset(
+      'assets/images/iconelivro.jpg',
+      width: 70,
+      height: 90,
+      fit: BoxFit.cover,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.symmetric(vertical: 8), // Para dar espaçamento entre cards
+      margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0xFFE7E3E3),
         borderRadius: BorderRadius.circular(8),
@@ -34,18 +61,7 @@ class MeuLivroCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
-            child: Image.network(
-              imagemUrl,
-              width: 70,
-              height: 90,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Image.asset(
-                'assets/images/iconelivro.jpg',
-                width: 70,
-                height: 90,
-                fit: BoxFit.cover,
-              ),
-            ),
+            child: _buildImagem(),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -86,7 +102,7 @@ class MeuLivroCard extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           SizedBox(
-            width: 48, // Largura controlada para os botões
+            width: 48,
             child: Column(
               children: [
                 IconButton(

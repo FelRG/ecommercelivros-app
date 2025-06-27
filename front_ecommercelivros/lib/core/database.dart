@@ -21,6 +21,9 @@ class AppDatabase {
       path,
       version: 1,
       onCreate: (db, version) async {
+
+        // await db.execute('PRAGMA foreign_keys = ON'); // Ativa no momento da criação
+
         await db.execute('''
           CREATE TABLE users(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,6 +85,9 @@ class AppDatabase {
           )
         ''');
       },
+      // onOpen: (db) async {
+      //   await db.execute('PRAGMA foreign_keys = ON'); // Ativa sempre que o banco for aberto
+      // },
     );
   }
 }
