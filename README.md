@@ -216,11 +216,12 @@ Remove a conta do usuário e seus dados.
 
 ### 1️⃣ Clonar o repositório
 ```bash
-git clone https://github.com/seuusuario/livrolumina.git
+https://github.com/FelRG/ecommercelivros-app.git
 ```
+
 ### 2️⃣ Entrar na pasta do projeto
 ```bash
-cd livrolumina
+cd front_ecommercelivros
 ```
 
 ### 3️⃣ Instalar dependências
@@ -232,6 +233,7 @@ flutter pub get
 ```bash
 flutter run
 ```
+
 ### 📦 Build do Aplicativo
 
 Para gerar o APK:
